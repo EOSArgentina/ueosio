@@ -1,0 +1,8 @@
+__pycache__
+.vscode
+*.egg-info
+dist
+venv
+dev.env
+ueosio/__pycache__
+
