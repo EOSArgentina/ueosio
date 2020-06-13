@@ -1,0 +1,7 @@
+base58
+certifi
+chardet
+cryptos
+idna
+requests
+urllib3
