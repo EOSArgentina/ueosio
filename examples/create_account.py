@@ -66,5 +66,5 @@ packed_trx = binascii.hexlify(ds.getvalue()).decode('utf-8')
 tx = build_push_transaction_body(tx['signatures'][0], packed_trx)
 
 # Push tx
-res = r.post('https://telos-testnet.cryptolions.io/v1/chain/push_transaction', json=tx).json()
+res = r.post('https://api.testnet.telos.eosargentina/v1/chain/push_transaction', json=tx).json()
 print(res)
