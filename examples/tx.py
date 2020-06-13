@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from ueosio import sign_tx, DataStream, get_expiration, get_tapos_info, build_push_transaction_body
 
 ### example tx
-tx = {"delay_sec":0,"max_cpu_usage_ms":0,"actions":[{"account":"eosio.token","name":"transfer","data":{"from":"youraccount1","to":"argentinaeos","quantity":"0.0001 EOS","memo":"µEOSIO"},"authorization":[{"actor":"tikitakatiki","permission":"active"}]}]}
+tx = {"delay_sec":0,"max_cpu_usage_ms":0,"actions":[{"account":"eosio.token","name":"transfer","data":{"from":"youraccount1","to":"argentinaeos","quantity":"0.0001 EOS","memo":" This tx was sent using µEOSIO"},"authorization":[{"actor":"youraccount1","permission":"active"}]}]}
 
 # Get chain info from a working api node
 info = r.get('https://api.eosargentina.io/v1/chain/get_info').json()
