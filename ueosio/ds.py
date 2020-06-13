@@ -281,8 +281,52 @@ class DataStream():
 
     def unpack_permission_level(self):
         return OrderedDict([
-            ("actor", self.unpack_account_name())
+            ("actor", self.unpack_account_name()),
             ("permission", self.unpack_account_name())
+        ])
+
+    def pack_permission_level_weight(self, v):
+        self.pack_permission_level(v["permission"])
+        self.pack_int16(v["weight"])
+
+    def unpack_permission_level_weight(self):
+        return OrderedDict([
+            ("permission", self.unpack_permission_level()),
+            ("weight", self.unpack_int16())
+        ])
+
+    def pack_key_weight(self, v):
+        self.pack_public_key(v["key"])
+        self.pack_int16(v["weight"])
+
+    def unpack_key_weight(self):
+        return OrderedDict([
+            ("key", self.unpack_public_key()),
+            ("weight", self.unpack_int16())
+        ])
+
+    def pack_wait_weight(self, v):
+        self.pack_uint32(v["wait_sec"])
+        self.pack_int16(v["weight"])
+
+    def unpack_wait_weight(self):
+        return OrderedDict([
+            ("wait_sec", self.unpack_uint32()),
+            ("weight", self.unpack_int16())
+        ])
+
+    def pack_authority(self, v):
+        self.pack_uint32(v["threshold"])
+        self.pack_array('key_weight', v['keys'])
+        self.pack_array('permission_level_weight', v['accounts'])
+        self.pack_array('wait_weight', v['waits'])
+
+    def unpack_authority(self):
+        return OrderedDict([
+            ("threshold", self.unpack_uint32()),
+            ("keys", self.unpack_array('key_weight')),
+            ("accounts", self.unpack_array('permission_level_weight')),
+            ("waits", self.unpack_array('wait_weight'))
         ])
 
     def pack_action(self, v):
@@ -293,9 +337,9 @@ class DataStream():
 
     def unpack_action(self, v):
         return OrderedDict([
-            ("account", self.unpack_account_name())
-            ("name", self.unpack_account_name())
-            ("authorization", self.unpack_array("permission_level"))
+            ("account", self.unpack_account_name()),
+            ("name", self.unpack_account_name()),
+            ("authorization", self.unpack_array("permission_level")),
             ("data", self.unpack_bytes())
         ])
 
@@ -394,7 +438,7 @@ class DataStream():
         if t == 0:
             data = self.read(33)
             data = data + ripmed160(data)[:4]
-            return "EOS" + b58encode(data)
+            return "EOS" + b58encode(data).decode('ascii')
         elif t == 1:
             raise Exception("not implementd")
         else:
