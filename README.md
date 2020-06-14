@@ -20,3 +20,9 @@ Micro EOSIO allows you to interact with any EOSio chain using Python.
 [approve_multisig.py](/examples/approve_multisig.py): Approve a multisig transaction.
 
 [create_account.py](/examples/create_account.py): Create an account, buy ram and delegate bandwidth and CPU. 
+
+_____
+
+
+[MIT License](LICENSE) \
+Copyright (c) 2020 AntarticaLabs
