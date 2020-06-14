@@ -40,7 +40,7 @@ tx.update({
 auth = tx['actions'][0]['authorization'][0]
 private_key = getpass("Enter private key for %s@%s: " % (auth['actor'], auth['permission']))
 
-# Sign transaction, make sure to put correct chain id
+# Sign transaction
 tx_id, tx = sign_tx(
    chain_id,
    tx,
