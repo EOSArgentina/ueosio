@@ -12,6 +12,7 @@ tx = {"delay_sec":0,"max_cpu_usage_ms":0,"actions":[{"account":"eosio.token","na
 # Get chain info from a working api node
 info = r.get('https://api.eosargentina.io/v1/chain/get_info').json()
 ref_block_num, ref_block_prefix = get_tapos_info(info['last_irreversible_block_id'])
+chain_id = info['chain_id']
 
 # package transation
 data = tx['actions'][0]['data']
@@ -41,7 +42,7 @@ private_key = getpass("Enter private key for %s@%s: " % (auth['actor'], auth['pe
 
 # Sign transaction, make sure to put correct chain id
 tx_id, tx = sign_tx(
-   "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906",
+   chain_id,
    tx,
    private_key
 )
