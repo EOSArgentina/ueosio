@@ -6,7 +6,7 @@ from getpass import getpass
 from datetime import datetime, timedelta
 from ueosio import sign_tx, DataStream, get_expiration, get_tapos_info, build_push_transaction_body
 
-tx='{"delay_sec":0,"max_cpu_usage_ms":0,"actions":[{"account":"eosio","name":"newaccount","data":{"creator":"argentinatls","name":"chittychitty","owner":{"threshold":1,"keys":[{"key":"EOS6wDfFCJqNYD3mteMZ4nEaYzx6s4TKKXeU4aQu35vyvexMWSdi5","weight":1}],"accounts":[],"waits":[]},"active":{"threshold":1,"keys":[{"key":"EOS6wDfFCJqNYD3mteMZ4nEaYzx6s4TKKXeU4aQu35vyvexMWSdi5","weight":1}],"accounts":[],"waits":[]}},"authorization":[{"actor":"argentinatls","permission":"active"}]},{"account":"eosio","name":"buyrambytes","data":{"payer":"argentinatls","receiver":"chittychitty","bytes":15000},"authorization":[{"actor":"argentinatls","permission":"active"}]},{"account":"eosio","name":"delegatebw","data":{"from":"argentinatls","receiver":"chittychitty","stake_net_quantity":"2.1234 TLOS","stake_cpu_quantity":"2.1234 TLOS","transfer":true},"authorization":[{"actor":"argentinatls","permission":"active"}]}]}'
+tx='{"delay_sec":0,"max_cpu_usage_ms":0,"actions":[{"account":"eosio","name":"newaccount","data":{"creator":"argentinatls","name":"chittychitty","owner":{"threshold":1,"keys":[{"key":"EOS6wDfFCJqNYD3mteMZ4nEaYzx6s4TKKXeU4aQu35vyvexMWSdi5","weight":1}],"accounts":[],"waits":[]},"active":{"threshold":1,"keys":[{"key":"EOS6wDfFCJqNYD3mteMZ4nEaYzx6s4TKKXeU4aQu35vyvexMWSdi5","weight":1}],"accounts":[],"waits":[]}},"authorization":[{"actor":"argentinatls","permission":"active"}]},{"account":"eosio","name":"buyram","data":{"payer":"argentinatls","receiver":"chittychitty","quant":"5.0000 TLOS"},"authorization":[{"actor":"argentinatls","permission":"active"}]},{"account":"eosio","name":"delegatebw","data":{"from":"argentinatls","receiver":"chittychitty","stake_net_quantity":"2.1234 TLOS","stake_cpu_quantity":"2.1234 TLOS","transfer":true},"authorization":[{"actor":"argentinatls","permission":"active"}]}]}'
 tx = json.loads(tx)
 
 # Get chain info
@@ -25,8 +25,7 @@ ds2 = DataStream()
 data = tx['actions'][1]['data']
 ds2.pack_name(data['payer'])
 ds2.pack_name(data['receiver'])
-bytes = str(data['bytes'])
-ds2.pack_bytes(bytes)
+ds2.pack_asset(data['quant'])
 # Wrap tx 3
 ds3 = DataStream()
 data = tx['actions'][2]['data']
