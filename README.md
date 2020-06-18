@@ -3,7 +3,11 @@
 
 Micro EOSIO allows you to interact with any EOSio chain using Python.
 
-# Build
+# Install
+
+    pip install ueosio
+
+# Build from source
 
     git clone https://github.com/AntarticaLabs/ueosio
     cd ueosio
