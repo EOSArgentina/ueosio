@@ -1,5 +1,5 @@
 # µEOSIO
-**Python wrapper for EOSio**
+**General purpose library for the EOSIO blockchains**
 
 Micro EOSIO allows you to interact with any EOSio chain using Python.
 
