@@ -7,11 +7,13 @@ import logging
 from collections import OrderedDict
 
 RPC_NODE = os.environ.get('RPC_NODE', 'http://127.0.0.1:8888')
+TIMEOUT = os.environ.get('TIMEOUT',10)
 
 class ApiNameWrapper:
-  def __init__(self, host, api_version, api_name):
+  def __init__(self, host, api_version,timeout, api_name):
     self.host = host
     self.api_version = api_version
+    self.timeout = timeout
     self.api_name = api_name
 
   def __getattr__(self, attr):
@@ -29,28 +31,28 @@ class ApiNameWrapper:
         payload=json.dumps(args[0])
       else:
         payload=json.dumps(list(args))
-      
-      res = r.post(url, data=payload, headers=headers, timeout=5)
+      res = r.post(url, data=payload, headers=headers, timeout=self.timeout)
 
       return json.loads(res.text, object_pairs_hook=OrderedDict)
-
     return call_name
 
 class ApiVerWrapper:
-  def __init__(self, host, api_version):
+  def __init__(self, host, timeout, api_version):
     self.host = host
+    self.timeout= timeout
     self.api_version = api_version
 
   def __getattr__(self, attr):
-    return ApiNameWrapper(self.host, self.api_version, attr)
+    return ApiNameWrapper(self.host, self.api_version, self.timeout, attr)
 
 class Api(object):
 
-  def __init__(self, host=RPC_NODE):
+  def __init__(self, host=RPC_NODE, timeout=TIMEOUT):
+    self.timeout = timeout
     self.host = host
 
   def set_host(self, host):
     self.host = host
 
   def __getattr__(self, attr):
-    return ApiVerWrapper(self.host, attr)
+    return ApiVerWrapper(self.host, self.timeout, attr)
