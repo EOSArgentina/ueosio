@@ -5,7 +5,7 @@ Micro EOSIO allows you to interact with any EOSio chain using Python.
 
 # Install
 
-    pip install ueosio
+    pip3 install ueosio
 
 # Build from source
 
@@ -13,7 +13,7 @@ Micro EOSIO allows you to interact with any EOSio chain using Python.
     cd ueosio
     python3 -m venv venv
     source venv/bin/activate
-    pip install -r examples/requirements.txt
+    pip3 install -r examples/requirements.txt
 
 ### Examples:
 
