@@ -29,4 +29,4 @@ _____
 
 
 [MIT License](LICENSE) \
-Copyright (c) 2020 AntarticaLabs
+Copyright (c) 2020 EOS Argentina
