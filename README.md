@@ -25,6 +25,8 @@ Micro EOSIO allows you to interact with any EOSio chain using Python.
 
 [create_account.py](/examples/create_account.py): Create an account, buy ram and delegate bandwidth and CPU. 
 
+[get_top_10_bps.py](/examples/get_top_10_bps.py): Use the rpc module to get list of BPs on any eosio blockchain. 
+
 _____
 
 
