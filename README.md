@@ -1,7 +1,11 @@
 # µEOSIO
 **General purpose library for the EOSIO blockchains**
 
-Micro EOSIO allows you to interact with any EOSio chain using Python.
+Micro EOSIO allows you to interact with any EOSio chain using Python, it consists of 3 modules: 
+
+* **DS:** Is the Data Stream module and it contains functions for serialization and deserialization of data streams in the eosio format.
+* **UTILS:** General functions that are useful for eosio.
+* **RPC:** Module for making API interactions.
 
 # Install
 
