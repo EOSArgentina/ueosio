@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ueosio"
-version = "0.1.5"
+version = "0.1.7"
 description = "uEOSIO python library"
 authors = ["Matias Romeo <matias.romeo@gmail.com>"]
 
