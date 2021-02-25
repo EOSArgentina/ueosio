@@ -2,6 +2,7 @@ import io
 import struct
 import time
 import hashlib
+import binascii
 import calendar
 from datetime import datetime
 from base58 import b58decode, b58encode
@@ -91,10 +92,8 @@ def asset_to_uint64_pair(a):
     if len(parts) != 2: raise Exception("invalid asset {0}".format(a))
 
     nums = parts[0].split(".")
-    if len(nums) != 2: raise Exception("invalid number {0}".format(parts[0]))
-
     num = ''.join(nums)
-    return int(num), string_to_symbol(len(nums[1]), parts[1])
+    return int(num), string_to_symbol(len(nums[1]) if len(nums) > 1 else 0, parts[1])
 
 
 class DataStream():
@@ -335,7 +334,7 @@ class DataStream():
         self.pack_array("permission_level", v["authorization"])
         self.pack_bytes(bytes.fromhex(v["data"]))
 
-    def unpack_action(self, v):
+    def unpack_action(self):
         return OrderedDict([
             ("account", self.unpack_account_name()),
             ("name", self.unpack_account_name()),
@@ -384,7 +383,7 @@ class DataStream():
         self.pack_account_name(v)
 
     def unpack_name(self):
-        raise Exception("not implementd")
+        return self.unpack_account_name()
 
     def pack_bytes(self, v):
         if type(v) == int or type(v) == float:
@@ -577,15 +576,14 @@ class DataStream():
 
     def pack_abi(self, v):
         self.pack_string(v["version"])
-        self.pack_array("type_def", v["types"])
-        self.pack_array("struct_def", v["structs"])
-        self.pack_array("action_def", v["actions"])
-        self.pack_array("table_def", v["tables"])
-        self.pack_array("clause_pair", v["ricardian_clauses"])
-        self.pack_array("error_message", v["error_messages"])
-        self.pack_array("extension", v["abi_extensions"])
-        if "variants" in v:
-            self.pack_array("variant", v["variants"])
+        self.pack_array("type_def", v.get("types",[]))
+        self.pack_array("struct_def", v.get("structs",[]))
+        self.pack_array("action_def", v.get("actions",[]))
+        self.pack_array("table_def", v.get("tables",[]))
+        self.pack_array("clause_pair", v.get("ricardian_clauses",[]))
+        self.pack_array("error_message", v.get("error_messages",[]))
+        self.pack_array("extension", v.get("abi_extensions",[]))
+        self.pack_array("variant", v.get("variants",[]))
 
     def unpack_abi(self):
         tmp = OrderedDict([
@@ -609,13 +607,16 @@ class DataStream():
         raise Exception("not implementd")
 
     def unpack_symbol(self):
-        raise Exception("not implementd")
+        v = self.unpack_uint64()
+        precision = v & 0xFF
+        v >>= 8
+        return f"{precision},{uint64_to_symbol_code(v)}"
 
     def pack_symbol_code(self, v):
         self.pack_uint64(symbol_code_to_uint64(v))
 
     def unpack_symbol_code(self):
-        raise Exception("not implementd")
+        return uint64_to_symbol_code(self.unpack_uint64())
 
     def pack_asset(self, v):
         a, s = asset_to_uint64_pair(v)
@@ -623,13 +624,18 @@ class DataStream():
         self.pack_uint64(s)
 
     def unpack_asset(self):
-        raise Exception("not implementd")
+        amount = self.unpack_int64()
+        symbol = self.unpack_symbol()
+        return f"{amount},{symbol}"
 
     def pack_extended_asset(self, v):
         raise Exception("not implementd")
 
     def unpack_extended_asset(self):
-        raise Exception("not implementd")
+        return OrderedDict([
+            ("quantity", self.unpack_asset()),
+            ("contract", self.unpack_name()),
+        ])
 
     def pack_sha256(self, v):
         if len(v) != 64: raise Exception("Invalid sha256 length")
@@ -637,7 +643,7 @@ class DataStream():
 
     def unpack_sha256(self):
         d = self.read(32)
-        return d.encode('hex')
+        return binascii.hexlify(d).decode('utf-8')
 
     def pack_chain_id_type(self, v):
         self.pack_sha256(v)
@@ -692,3 +698,152 @@ class DataStream():
             self.unpack_string(),
             self.unpack_int16()
         ]
+
+    def unpack_partial_transaction(self):
+        return OrderedDict([
+            ("version", self.unpack_varuint32()),
+            ("expiration", self.unpack_time_point_sec()),
+            ("ref_block_num", self.unpack_uint16()),
+            ("ref_block_prefix", self.unpack_uint32()),
+            ("max_net_usage_words", self.unpack_varuint32()),
+            ("max_cpu_usage_ms", self.unpack_uint8()),
+            ("delay_sec", self.unpack_varuint32()),
+            ("transaction_extensions", self.unpack_array('extension')),
+            ("signatures", self.unpack_array('signature')),
+            ("context_free_data", self.unpack_bytes()),
+        ])
+
+    def unpack_augmented_transaction_trace(self):
+        return OrderedDict([
+            ("version", self.unpack_varuint32()),
+            ("trace_id", self.unpack_checksum256()),
+            ("status", self.unpack_uint8()),
+            ("cpu_usage_us", self.unpack_uint32()),
+            ("net_usage_words", self.unpack_varuint32()),
+            ("trace_elapsed", self.unpack_int64()),
+            ("net_usage", self.unpack_uint64()),
+            ("scheduled", self.unpack_uint8()),
+            ("action_traces", self.unpack_array("action_trace")),
+            ("account_delta", self.unpack_optional('account_delta')),
+            ("trace_error", self.unpack_optional('string')),
+            ("trace_ec", self.unpack_optional('uint64')),
+            ("dtrx_trace", self.unpack_optional('augmented_transaction_trace')),
+            ("partial_transaction", self.unpack_optional('partial_transaction'))
+        ])
+
+    def unpack_account_delta(self):
+        return OrderedDict([
+            ("account", self.unpack_name()),
+            ("delta", self.unpack_uint64()),
+        ])
+
+    def unpack_auth_sequence(self):
+        return OrderedDict([
+            ("account_name", self.unpack_name()),
+            ("sequence", self.unpack_uint64()),
+        ])
+
+    def unpack_action_receipt(self):
+        return OrderedDict([
+            ("version", self.unpack_varuint32()),
+            ("receiver", self.unpack_name()),
+            ("act_digest", self.unpack_checksum256()),
+            ("global_sequence", self.unpack_uint64()),
+            ("recv_sequence", self.unpack_uint64()),
+            ("auth_sequence", self.unpack_array("auth_sequence")),
+            ("code_sequence", self.unpack_varuint32()),
+            ("abi_sequence", self.unpack_varuint32()),
+        ])
+
+    def unpack_action_trace(self):
+        return OrderedDict([
+            ("version", self.unpack_varuint32()),
+            ("action_ordinal", self.unpack_varuint32()),
+            ("creator_action_ordinal", self.unpack_varuint32()),
+            ("receipt", self.unpack_optional('action_receipt')),
+            ("receiver", self.unpack_name()),
+            ("action", self.unpack_action()),
+            ("context_free", self.unpack_uint8()),
+            ("elapsed", self.unpack_int64()),
+            ("console", self.unpack_string()),
+            ("account_delta", self.unpack_array('account_delta')),
+            ("error", self.unpack_optional('string')),
+            ("error_code", self.unpack_optional('uint64')),
+        ])
+
+    def unpack_stat_table(self):
+        return OrderedDict([
+            ("supply", self.unpack_asset()),
+            ("max_supply",  self.unpack_asset()),
+            ("issuer", self.unpack_name()),
+            ("pool1", self.unpack_extended_asset()),
+            ("pool2", self.unpack_extended_asset()),
+            ("fee", self.unpack_int32()),
+            ("fee_contract", self.unpack_name())
+        ])
+
+
+    def unpack_history_context_wrapper(self):
+        return OrderedDict([
+            ("dummy", self.unpack_varuint32()),
+            ("code",  self.unpack_name()),
+            ("scope", self.unpack_name()),
+            ("table", self.unpack_name()),
+            ("pk", self.unpack_uint64()),
+            ("payer", self.unpack_name()),
+            ("value", self.unpack_bytes())
+        ])
+
+    def unpack_state_row(self):
+        return OrderedDict([
+            ("present", self.unpack_uint8()),
+            ("bytes", self.unpack_bytes())
+        ])
+
+    def unpack_table_delta(self):
+        return OrderedDict([
+            ("struct_version", self.unpack_varuint32()),
+            ("name", self.unpack_string()),
+            ("rows", self.unpack_array("state_row"))
+        ])
+    
+    def pack_block_position(self, v):
+        self.pack_uint32(v['block_num'])
+        self.pack_checksum256(v['block_id'])
+
+    def unpack_block_position(self):
+        return OrderedDict([
+            ("block_num", self.unpack_uint32()),
+            ("block_id", self.unpack_checksum256())
+        ])
+
+    def pack_get_blocks_request_v0(self, v):
+        self.pack_uint32(v['start_block_num'])
+        self.pack_uint32(v['end_block_num'])
+        self.pack_uint32(v['max_messages_in_flight'])
+        self.pack_array("block_position", v['have_positions'])
+        self.pack_uint8(v['irreversible_only'])
+        self.pack_uint8(v['fetch_block'])
+        self.pack_uint8(v['fetch_traces'])
+        self.pack_uint8(v['fetch_deltas'])
+
+    def unpack_get_status_result_v0(self):
+        return OrderedDict([
+            ("head", self.unpack_block_position()),
+            ("last_irreversible", self.unpack_block_position()),
+            ("trace_begin_block", self.unpack_uint32()),
+            ("trace_end_block", self.unpack_uint32()),
+            ("chain_state_begin_block", self.unpack_uint32()),
+            ("chain_state_end_block", self.unpack_uint32())
+        ])
+
+    def unpack_get_blocks_result_v0(self):
+        return OrderedDict([
+            ("head", self.unpack_block_position()),
+            ("last_irreversible", self.unpack_block_position()),
+            ("this_block", self.unpack_optional('block_position')),
+            ("prev_block", self.unpack_optional('block_position')),
+            ("block", self.unpack_optional('bytes')),
+            ("traces", self.unpack_optional('bytes')),
+            ("deltas", self.unpack_optional('bytes'))
+        ])

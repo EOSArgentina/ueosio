@@ -6,6 +6,7 @@ Micro EOSIO allows you to interact with any EOSio chain using Python, it consist
 * **DS:** Is the Data Stream module and it contains functions for serialization and deserialization of data streams in the eosio format.
 * **UTILS:** General functions that are useful for eosio.
 * **RPC:** Module for making API interactions.
+* **ABI:** Module to work with eosio ABI files
 
 # Install
 
@@ -13,7 +14,7 @@ Micro EOSIO allows you to interact with any EOSio chain using Python, it consist
 
 # Build from source
 
-    git clone https://github.com/AntarticaLabs/ueosio
+    git clone https://github.com/EOSArgentina/ueosio
     cd ueosio
     python3 -m venv venv
     source venv/bin/activate
@@ -31,6 +32,9 @@ Micro EOSIO allows you to interact with any EOSio chain using Python, it consist
 
 [get_top_10_bps.py](/examples/get_top_10_bps.py): Use the rpc module to get list of BPs on any eosio blockchain. 
 
+[abi_hash.py](/examples/abi_hash.py): Get serialized abi hash. 
+
+[extract_pubkey_from_tx.py](/examples/extract_pubkey_from_tx.py): Extract pubkeys used to sign a transaction. 
 _____
 
 

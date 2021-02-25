@@ -1,8 +1,11 @@
 [tool.poetry]
 name = "ueosio"
-version = "0.2.3"
+version = "0.2.5"
 description = "uEOSIO python library"
 authors = ["Matias Romeo <matias.romeo@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/EOSArgentina/ueosio"
+repository = "https://github.com/EOSArgentina/ueosio"
 
 [tool.poetry.dependencies]
 python = "^3.6"
