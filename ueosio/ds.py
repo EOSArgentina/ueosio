@@ -604,10 +604,17 @@ class DataStream():
         return tmp
 
     def pack_symbol(self, v):
-        raise Exception("not implementd")
+        segments = v.split(',')
+        precision = int(segments[0]) & 0xFF
+        symbol_code = segments[1]
+        symbol_code_as_uint64 = symbol_code_to_uint64(symbol_code)
+        # shift symbol_code_to_the left so it can be bitwise OR-ed
+        ret = symbol_code_as_uint64 << 8
+        ret |= precision
+        return self.pack_uint64(ret)
 
-    def unpack_symbol(self):
-        v = self.unpack_uint64()
+    def unpack_symbol(self, v):
+        v = self.unpack_uint64(v)
         precision = v & 0xFF
         v >>= 8
         return f"{precision},{uint64_to_symbol_code(v)}"
