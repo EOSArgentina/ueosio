@@ -58,18 +58,22 @@ def ecdsa_raw_sign_nonce(msghash, priv, nonce):
         v += 4
     return v, r, s
 
-def sign_bytes(ds, pk):
+def sign_hash(h, pk):
     nonce = 0
-    m = hashlib.sha256()
-    m.update(ds.getvalue())
     while True:
-        v, r, s = ecdsa_raw_sign_nonce(m.digest(), pk, nonce)
+        v, r, s = ecdsa_raw_sign_nonce(h, pk, nonce)
         if is_canonical(r, s):
             signature = '00%02x%064x%064x' % (v, r, s)
             break
         nonce += 1
     sig = DataStream(bytes.fromhex(signature)).unpack_signature()
     return sig
+
+def sign_bytes(ds, pk):
+    nonce = 0
+    m = hashlib.sha256()
+    m.update(ds.getvalue())
+    return sign_hash(m.digest(), pk)
 
 def sign_tx(chain_id, tx, pk):
     zeros = '0000000000000000000000000000000000000000000000000000000000000000'
